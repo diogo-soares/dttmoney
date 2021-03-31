@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useContext } from 'react';
 import Modal from 'react-modal';
 import closeImg from '../../assets/Vector.svg';
 import incomeImg from '../../assets/Entradas.svg'
@@ -7,6 +7,8 @@ import outcomeImg from '../../assets/Saidas.svg';
 import { api } from '../services/api';
 
 import { Container, TransactionTypeContainer, RadioBox } from './styles'
+import { useTransactions } from '../../hooks/useTransactions';
+
 
 
 
@@ -22,24 +24,30 @@ interface newTransactionMOdalProps{
 
 export function NewTransactionModal({isOpen, OnRequestClose }: newTransactionMOdalProps){
   
+  const { createTransaction } = useTransactions();
+
   const [title, setTitle] = useState('');
-  const [value, setValue] = useState(0);
-  const [categoty, setCategoty] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [category, setCategory] = useState('');
 
   const [type, setType] = useState('deposit');
   
-function handCreateNewTransaction(event: FormEvent) {
+ async function handCreateNewTransaction(event: FormEvent) {
     event.preventDefault();
 
-   const data={
+   await createTransaction({
       title,
-      value,
-      categoty,
+      amount,
+      category,
       type,
+   })
 
-    };
-
-    api.post('/transactions', data)
+   setTitle('');
+   setAmount(0);
+   setCategory('');
+   setType('')
+   
+   OnRequestClose();
 }
   
   return (
@@ -70,8 +78,8 @@ function handCreateNewTransaction(event: FormEvent) {
                 
                 <input type="number"
                  placeholder="Valor" 
-                 value={value}
-                 onChange={event => setValue(Number(event.target.value))} 
+                 value={amount}
+                 onChange={event => setAmount(Number(event.target.value))} 
                    />
 
                 <TransactionTypeContainer>
@@ -101,8 +109,8 @@ function handCreateNewTransaction(event: FormEvent) {
 
                 <input 
                  placeholder="Categoria"
-                 value={categoty}
-                 onChange={event => setCategoty(event.target.value)}
+                 value={category}
+                 onChange={event => setCategory(event.target.value)}
                 />   
 
                 <button type="submit">
